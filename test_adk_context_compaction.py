@@ -25,10 +25,18 @@ from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.adk.events import Event
 from google.adk.apps.app import App, EventsCompactionConfig
+from google.adk.apps.llm_event_summarizer import LlmEventSummarizer
+from google.adk.models import Gemini
 from google.genai import types
 
 # Import our agent
 from context_compaction_agent import root_agent
+
+# Create a shared summarizer instance for all tests
+# This explicit summarizer is REQUIRED for Vertex AI Agent Engine deployment
+DEFAULT_SUMMARIZER = LlmEventSummarizer(
+    llm=Gemini(model="gemini-2.5-flash")
+)
 
 
 def check_api_key() -> str:
@@ -72,12 +80,14 @@ async def run_conversation_with_compaction(
     session_service = InMemorySessionService()
 
     # Create App with context compaction configuration
+    # NOTE: Explicit summarizer is REQUIRED for Vertex AI Agent Engine deployment
     app = App(
         name="context_compaction_poc",
         root_agent=root_agent,
         events_compaction_config=EventsCompactionConfig(
             compaction_interval=compaction_interval,
             overlap_size=overlap_size,
+            summarizer=DEFAULT_SUMMARIZER,  # Explicit summarizer for Vertex AI
         ),
     )
 
@@ -585,12 +595,14 @@ async def interactive_mode():
     session_service = InMemorySessionService()
 
     # Create App with context compaction configuration
+    # NOTE: Explicit summarizer is REQUIRED for Vertex AI Agent Engine deployment
     app = App(
         name="context_compaction_poc",
         root_agent=root_agent,
         events_compaction_config=EventsCompactionConfig(
             compaction_interval=compaction_interval,
             overlap_size=overlap_size,
+            summarizer=DEFAULT_SUMMARIZER,  # Explicit summarizer for Vertex AI
         ),
     )
 
@@ -606,6 +618,7 @@ async def interactive_mode():
     )
 
     print(f"\nCompaction settings: interval={compaction_interval}, overlap={overlap_size}")
+    print("Using explicit LlmEventSummarizer (required for Vertex AI)")
 
     turn = 0
     while True:

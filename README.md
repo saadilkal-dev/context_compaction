@@ -22,7 +22,8 @@ context_compaction/
 ├── test_adk_context_compaction.py  # Main POC script (ADK)
 ├── context_compaction_agent/       # ADK Agent package
 │   ├── __init__.py
-│   └── agent.py                    # Agent definition (no tools)
+│   ├── agent.py                    # Agent definition
+│   └── tools.py                    # Agent tools
 ├── simple_gemini_call.py           # Basic Gemini API test
 └── test_gemini_context.py          # Raw API context test
 ```
@@ -33,7 +34,6 @@ context_compaction/
 
 ```bash
 chmod +x run_poc.sh
-./run_poc.sh
 ```
 
 ### Option 2: Manual setup
@@ -64,21 +64,23 @@ python test_adk_context_compaction.py
 
 ## Available Tests
 
-The POC includes several tests using **pure context compaction** (no tools):
+The POC includes several tests:
 
-1. **Basic Memory Retention** - Natural conversation, then recall test
-2. **Context Filling** - Important info → filler content → recall test
-3. **Multiple Facts** - Many facts across turns with multiple compaction cycles
-4. **Compare Compaction Intervals** - Aggressive (interval=2) vs relaxed (interval=5)
+1. **Basic Memory Retention** - Tests fact storage and recall across turns
+2. **Context Filling** - Generates large content to trigger compaction
+3. **Multiple Facts** - Stores many facts across an extended conversation
+4. **Compare Compaction Intervals** - Tests different interval settings
 5. **Interactive Mode** - Manual testing with live chat
 
-## How the Agent Works
+## Using the ADK Agent
 
-The agent has **no tools** - it relies purely on:
-- Natural conversation history
-- ADK's built-in context compaction (auto-summarizes older turns)
+The agent (`context_compaction_agent`) includes these tools:
 
-This tests whether compaction preserves important information from conversation.
+- `remember_fact(key, value)` - Store a fact in memory
+- `recall_facts(key?)` - Recall stored facts
+- `get_memory_stats()` - Get memory statistics
+- `generate_long_text(num_paragraphs)` - Generate text to fill context
+- `calculate_fibonacci(n)` - Perform calculations
 
 ## Running with ADK CLI
 
