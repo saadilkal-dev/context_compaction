@@ -12,8 +12,6 @@ Memory Bank is enabled via PreloadMemoryTool, which allows the agent to:
 
 from google.adk.agents import LlmAgent
 from google.adk.apps.app import App, EventsCompactionConfig
-from google.adk.apps.llm_event_summarizer import LlmEventSummarizer
-from google.adk.models import Gemini
 from google.adk.tools.preload_memory_tool import PreloadMemoryTool
 
 # Create the root agent
@@ -41,14 +39,12 @@ recall from both the current conversation history and your memory.
 )
 
 # Create App with EventsCompactionConfig for deployment
+# Note: Not specifying summarizer lets ADK use its default summarizer
 app = App(
     name="context_compaction_agent",
     root_agent=root_agent,
     events_compaction_config=EventsCompactionConfig(
         compaction_interval=3,  # Compact every 3 turns
         overlap_size=1,         # Keep 1 turn overlap for continuity
-        summarizer=LlmEventSummarizer(
-            llm=Gemini(model="gemini-2.5-flash")
-        ),
     ),
 )
