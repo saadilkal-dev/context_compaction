@@ -1,0 +1,8 @@
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# ADK deploy temp folders
+context_compaction_agent_tmp*/
+

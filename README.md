@@ -74,13 +74,12 @@ The POC includes several tests:
 
 ## Using the ADK Agent
 
-The agent (`context_compaction_agent`) includes these tools:
+The agent (`context_compaction_agent`) includes:
 
-- `remember_fact(key, value)` - Store a fact in memory
-- `recall_facts(key?)` - Recall stored facts
-- `get_memory_stats()` - Get memory statistics
-- `generate_long_text(num_paragraphs)` - Generate text to fill context
-- `calculate_fibonacci(n)` - Perform calculations
+- **Memory Bank** (`PreloadMemoryTool`) - Automatically retrieves relevant memories from past sessions at the start of each turn
+- **Context Compaction** - Automatically summarizes older conversation turns to keep context manageable
+
+When deployed to Agent Engine, Memory Bank uses **Vertex AI Memory Bank** for persistent, cross-session memory. Locally, it uses in-memory storage for testing.
 
 ## Running with ADK CLI
 
@@ -93,6 +92,69 @@ adk web context_compaction_agent
 # CLI interface
 adk run context_compaction_agent
 ```
+
+## Deploying to Vertex AI Agent Engine
+
+### Prerequisites
+
+- Enable APIs: **Vertex AI API** + **Cloud Resource Manager API**
+- Create a GCS staging bucket (example: `gs://my-agent-engine-staging`)
+- Auth locally:
+
+```bash
+gcloud auth application-default login
+gcloud config set project YOUR_PROJECT_ID
+```
+
+### Install deploy dependency
+
+This repo includes it in `requirements.txt`:
+
+- `google-cloud-aiplatform[adk,agent_engines]>=1.111.0`
+
+### Deploy (recommended)
+
+### Observability / Telemetry (recommended)
+
+To populate the Agent Engine observability dashboard (OpenTelemetry traces/logs), set:
+
+```bash
+export ENABLE_TELEMETRY=true
+export TRACE_TO_CLOUD=true
+```
+
+To also capture full prompt + response content (may include sensitive data/PII), set:
+
+```bash
+export CAPTURE_MESSAGE_CONTENT=true
+```
+
+
+```bash
+export PROJECT_ID=YOUR_PROJECT_ID
+export REGION=us-central1
+export STAGING_BUCKET=gs://YOUR_BUCKET
+# optional
+export DISPLAY_NAME=context-compaction-agent
+
+./deploy_agent_engine.sh
+```
+
+### Deploy (manual CLI)
+
+```bash
+adk deploy agent_engine \
+  --project=YOUR_PROJECT_ID \
+  --region=us-central1 \
+  --staging_bucket=gs://YOUR_BUCKET \
+  --display_name="context-compaction-agent" \
+  context_compaction_agent
+```
+
+> Note: On Agent Engine, authentication uses Google Cloud credentials (ADC/service account). You typically do **not** use `GEMINI_API_KEY` for production deployments.
+
+> **Memory Bank**: When deployed to Agent Engine, the agent automatically uses **Vertex AI Memory Bank** for persistent, cross-session memory. The `PreloadMemoryTool` enables automatic memory retrieval at the start of each turn.
+
 
 ## Legacy Tests (Raw Gemini API)
 

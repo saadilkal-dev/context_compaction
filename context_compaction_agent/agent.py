@@ -4,12 +4,17 @@ ADK Agent with Context Compaction Configuration
 This agent demonstrates Google ADK's context compaction feature which
 automatically summarizes older conversation events to keep the context
 window manageable for long-running conversations.
+
+Memory Bank is enabled via PreloadMemoryTool, which allows the agent to:
+- Retrieve relevant memories from past sessions
+- Persist memories across sessions when deployed to Agent Engine
 """
 
 from google.adk.agents import LlmAgent
 from google.adk.apps.app import App, EventsCompactionConfig
 from google.adk.apps.llm_event_summarizer import LlmEventSummarizer
 from google.adk.models import Gemini
+from google.adk.tools.preload_memory_tool import PreloadMemoryTool
 
 # Create the root agent
 root_agent = LlmAgent(
@@ -22,15 +27,17 @@ Your job is simple:
 1. Have natural conversations with users
 2. Remember what users tell you during the conversation
 3. When asked to recall information, use your conversation history to answer
+4. Use your memory to recall information from past conversations when relevant
 
-DO NOT use any tools. Just respond naturally based on the conversation context.
 The context compaction feature will automatically summarize older parts of
-the conversation to keep it manageable.
+the conversation to keep it manageable. Memory Bank allows you to remember
+important information across sessions.
 
-When users share information about themselves, just acknowledge it naturally.
-When users ask what you remember, recall from the conversation history.
+When users share information about themselves, acknowledge it naturally and
+remember it for future conversations. When users ask what you remember,
+recall from both the current conversation history and your memory.
 """,
-    tools=[],  # No tools - rely purely on context compaction
+    tools=[PreloadMemoryTool()],  # Enable Memory Bank - retrieves relevant memories at start of each turn
 )
 
 # Create App with EventsCompactionConfig for deployment
