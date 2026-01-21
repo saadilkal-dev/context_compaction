@@ -7,9 +7,11 @@ window manageable for long-running conversations.
 """
 
 from google.adk.agents import LlmAgent
+from google.adk.apps.app import App, EventsCompactionConfig
+from google.adk.apps.llm_event_summarizer import LlmEventSummarizer
+from google.adk.models import Gemini
 
-# Create the root agent with context compaction enabled
-# NOTE: Use a model that has free-tier quota on your account (e.g. gemini-2.5-flash).
+# Create the root agent
 root_agent = LlmAgent(
     name="context_compaction_agent",
     model="gemini-2.5-flash",
@@ -29,4 +31,17 @@ When users share information about themselves, just acknowledge it naturally.
 When users ask what you remember, recall from the conversation history.
 """,
     tools=[],  # No tools - rely purely on context compaction
+)
+
+# Create App with EventsCompactionConfig for deployment
+app = App(
+    name="context_compaction_agent",
+    root_agent=root_agent,
+    events_compaction_config=EventsCompactionConfig(
+        compaction_interval=3,  # Compact every 3 turns
+        overlap_size=1,         # Keep 1 turn overlap for continuity
+        summarizer=LlmEventSummarizer(
+            llm=Gemini(model="gemini-2.5-flash")
+        ),
+    ),
 )
